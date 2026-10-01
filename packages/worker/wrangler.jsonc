@@ -1,0 +1,31 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "waline",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "waline",
+      "database_id": "7c49964c-b247-4f7d-9921-4b863a2adffc",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "vars": {
+    "SITE_NAME": "Waline",
+    "SITE_URL": "",
+    "OAUTH_URL": "https://oauth.lithub.cc",
+    "COMMENT_AUDIT": "false"
+  },
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "head_sampling_rate": 1
+    },
+    "traces": {
+      "enabled": true,
+      "head_sampling_rate": 0.01
+    }
+  }
+}

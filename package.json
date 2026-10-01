@@ -28,7 +28,10 @@
     "prepare": "husky install",
     "server:dev": "pnpm --dir=packages/server dev",
     "server:vercel": "vercel dev ./example --listen 9090",
-    "test": "vitest"
+    "test": "vitest",
+    "worker:build": "pnpm --dir=packages/worker build",
+    "worker:deploy": "pnpm --dir=packages/worker deploy",
+    "worker:dev": "pnpm --dir=packages/worker dev"
   },
   "dependencies": {
     "turbo": "^2.11.4",
