@@ -9,6 +9,7 @@ import { computed, inject, nextTick, onMounted, reactive, ref, useTemplateRef, w
 
 import {
   useEditor,
+  useCap,
   useReCaptcha,
   useTurnstile,
   useUserInfo,
@@ -203,8 +204,17 @@ const syncUserMeta = ({ link, mail, nick }: Partial<WalineCommentData>): void =>
 
 // oxlint-disable-next-line complexity, max-statements
 const submitComment = async (): Promise<void> => {
-  const { serverURL, lang, login, wordLimit, requiredMeta, recaptchaV3Key, turnstileKey } =
-    config.value;
+  const {
+    serverURL,
+    lang,
+    login,
+    wordLimit,
+    requiredMeta,
+    recaptchaV3Key,
+    turnstileKey,
+    capApiEndpoint,
+    capWidgetUrl,
+  } = config.value;
 
   const comment: WalineCommentData = {
     comment: content.value,
@@ -284,11 +294,13 @@ const submitComment = async (): Promise<void> => {
   isSubmitting.value = true;
 
   try {
-    if (recaptchaV3Key) {
+    if (capApiEndpoint) {
+      comment.cap = await useCap(capApiEndpoint, capWidgetUrl).execute();
+    } else if (recaptchaV3Key && !turnstileKey) {
       comment.recaptchaV3 = await useReCaptcha(recaptchaV3Key).execute('social');
     }
 
-    if (turnstileKey) {
+    if (turnstileKey && !capApiEndpoint) {
       comment.turnstile = await useTurnstile(turnstileKey).execute('social');
     }
 

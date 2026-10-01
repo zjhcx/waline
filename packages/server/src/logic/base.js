@@ -1,5 +1,6 @@
 const path = require('node:path');
 const qs = require('node:querystring');
+const verifyCap = require('../service/cap.js');
 
 module.exports = class BaseLogic extends think.Logic {
   constructor(...args) {
@@ -129,6 +130,16 @@ module.exports = class BaseLogic extends think.Logic {
   async useCaptchaCheck() {
     const { RECAPTCHA_V3_SECRET, TURNSTILE_SECRET } = process.env;
     const { turnstile, recaptchaV3 } = this.post();
+
+    if (process.env.CAP_SECRET || process.env.CAP_API_ENDPOINT) {
+      const valid = await verifyCap({
+        endpoint: process.env.CAP_API_ENDPOINT,
+        secret: process.env.CAP_SECRET,
+        token: this.post('cap'),
+      });
+      if (!valid) return this.ctx.throw(403);
+      return;
+    }
 
     if (TURNSTILE_SECRET) {
       return this.useRecaptchaOrTurnstileCheck({

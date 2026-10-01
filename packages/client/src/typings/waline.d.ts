@@ -209,6 +209,12 @@ export interface WalineProps {
    */
   turnstileKey?: string;
 
+  /** Cap Standalone site endpoint, including site key */
+  capApiEndpoint?: string;
+
+  /** URL of the Cap widget script; supports self-hosting */
+  capWidgetUrl?: string;
+
   /**
    * 文章反应
    *

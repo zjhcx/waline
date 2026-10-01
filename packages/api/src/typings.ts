@@ -50,6 +50,9 @@ export interface WalineCommentData {
 
   /** Turnstile Token */
   turnstile?: string;
+
+  /** Cap CAPTCHA token */
+  cap?: string;
 }
 
 export interface BaseWalineResponseComment {

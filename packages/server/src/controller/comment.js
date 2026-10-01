@@ -33,6 +33,7 @@ module.exports = class CommentController extends BaseRest {
         {
           ...input,
           captcha: {
+            cap: input.cap,
             turnstile: input.turnstile,
             recaptchaV3: input.recaptchaV3,
           },

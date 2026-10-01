@@ -1,3 +1,4 @@
+const verifyCap = require('./cap.js');
 const jwt = require('jsonwebtoken');
 const speakeasy = require('speakeasy');
 const parser = require('ua-parser-js');
@@ -76,6 +77,13 @@ module.exports = class extends think.Service {
         userAgent: { parse: (value) => parser(value) },
         captcha: {
           verify: async (input, ctx) => {
+            if (process.env.CAP_SECRET || process.env.CAP_API_ENDPOINT) {
+              return verifyCap({
+                endpoint: process.env.CAP_API_ENDPOINT,
+                secret: process.env.CAP_SECRET,
+                token: input?.cap,
+              });
+            }
             const secret = process.env.TURNSTILE_SECRET || process.env.RECAPTCHA_V3_SECRET;
 
             if (!secret) return true;

@@ -75,6 +75,8 @@ export const getConfig = ({
   login = 'enable',
   recaptchaV3Key = '',
   turnstileKey = '',
+  capApiEndpoint = '',
+  capWidgetUrl = '',
   commentSorting = 'latest',
   emoji = DEFAULT_EMOJI,
   imageUploader,
@@ -102,6 +104,8 @@ export const getConfig = ({
   noRss,
   recaptchaV3Key,
   turnstileKey,
+  capApiEndpoint,
+  capWidgetUrl,
   ...more,
   // oxlint-disable-next-line typescript/strict-boolean-expressions, typescript/prefer-nullish-coalescing
   reaction: reaction === true ? DEFAULT_REACTION : reaction || null,
