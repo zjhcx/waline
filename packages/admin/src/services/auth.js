@@ -1,10 +1,10 @@
 import request from '../utils/request.js';
 
-export const login = ({ email, password, code, recaptchaV3, turnstile }) =>
+export const login = ({ email, password, code, recaptchaV3, turnstile, cap }) =>
   request({
     url: 'token',
     method: 'POST',
-    body: { email, password, code, recaptchaV3, turnstile },
+    body: { email, password, code, recaptchaV3, turnstile, cap },
   });
 
 export const logout = () => {

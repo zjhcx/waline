@@ -58,8 +58,12 @@ export default function Register() {
         email,
         url: link,
         password,
-        recaptchaV3: window.recaptchaV3Key ? token : undefined,
-        turnstile: window.turnstileKey ? token : undefined,
+        cap: window.capApiEndpoint ? token : undefined,
+        recaptchaV3:
+          !window.capApiEndpoint && !window.turnstileKey && window.recaptchaV3Key
+            ? token
+            : undefined,
+        turnstile: !window.capApiEndpoint && window.turnstileKey ? token : undefined,
       });
 
       if (resp && resp.verify) {

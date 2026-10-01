@@ -1,4 +1,4 @@
-const { ObjectID: ObjectId } = require('think-mongo/lib/model');
+const { ObjectID: ObjectId } = require('think-mongo/lib/model.js');
 
 const Base = require('./base.js');
 const { normalizeOrder, toOrderString } = require('./order.js');

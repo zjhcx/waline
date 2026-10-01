@@ -1,7 +1,7 @@
 const model = require('think-model');
 const mongo = require('think-mongo');
 
-const { isNetlify, netlifyFunctionPrefix } = require('./netlify');
+const { isNetlify, netlifyFunctionPrefix } = require('./netlify.js');
 
 module.exports = [
   model(think.app),

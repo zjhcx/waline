@@ -1,0 +1,20 @@
+{
+  "name": "@waline/cloudflare-worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "wrangler deploy --dry-run",
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "db:migrate:local": "wrangler d1 migrations apply waline --local",
+    "db:migrate:remote": "wrangler d1 migrations apply waline --remote",
+    "typecheck": "wrangler types --include-runtime=false --check && tsc --noEmit",
+    "types": "wrangler types --include-runtime=false"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260716.1",
+    "typescript": "catalog:",
+    "wrangler": "^4.26.1"
+  }
+}

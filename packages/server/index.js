@@ -2,7 +2,9 @@ const os = require('node:os');
 const path = require('node:path');
 
 const Application = require('thinkjs');
-const Loader = require('thinkjs/lib/loader');
+// Keep the extension explicit so Wrangler's ESM bundler can resolve this
+// CommonJS deep import when packaging the server for Cloudflare Workers.
+const Loader = require('thinkjs/lib/loader.js');
 
 module.exports = function main(configParams = {}) {
   const { env, ...config } = configParams;

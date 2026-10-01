@@ -228,3 +228,11 @@ SMTP 的用户名通常均支持用户的完整邮箱，而密码大多同邮箱
 | `IP2REGION_DB`                  |                             | 自定义 IPv4 IP 查询库路径（已废弃，建议使用 `IP2REGION_DB_V4`）                                                                                                     |
 | `IP2REGION_DB_V4`               |                             | 自定义 IPv4 IP 查询库路径。如果未设置，将回退到 `IP2REGION_DB`                                                                                                      |
 | `IP2REGION_DB_V6`               |                             | 自定义 IPv6 IP 查询库路径。设置后可启用 IPv6 地址的归属地查询                                                                                                       |
+
+## Cap 验证码
+
+- `CAP_API_ENDPOINT`：Cap Standalone 站点端点，包含站点 key，例如 `https://cap.example.com/site-key/`。
+- `CAP_SECRET`：对应站点的 secret key，仅在服务端配置。
+- `CAP_WIDGET_URL`：可选的自托管 widget 脚本 URL，用于管理后台和示例页面。
+
+配置 Cap 后优先使用 Cap 校验，详见 [Cap 验证码](../../guide/features/cap.md)。

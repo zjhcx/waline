@@ -325,3 +325,18 @@ Turnstile 是 Cloudflare 提供的验证码服务，配置 turnstileKey 网站�
 - 默认值: `false`
 
 为文章增加表情互动功能，设置为 `true` 提供默认表情，也可以通过设置表情地址数组来自定义表情图片，最大支持 8 个表情。
+
+
+## capApiEndpoint
+
+- 类型：`string`
+- 默认值：`''`
+
+Cap Standalone 公开站点端点，包含站点 key，例如 `https://cap.example.com/site-key/`。服务端需同时配置 `CAP_API_ENDPOINT` 和 `CAP_SECRET`。启用后优先于 Turnstile 和 reCAPTCHA。
+
+## capWidgetUrl
+
+- 类型：`string`
+- 默认值：`''`
+
+可选的自托管 Cap widget 脚本 URL。留空时使用固定版本的公共 CDN 脚本，详见 [Cap 验证码](../../guide/features/cap.md)。

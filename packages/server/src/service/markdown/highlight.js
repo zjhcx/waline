@@ -1,5 +1,5 @@
 const prism = require('prismjs');
-const rawLoadLanguages = require('prismjs/components/index');
+const rawLoadLanguages = require('prismjs/components/index.js');
 
 // prevent warning messages
 rawLoadLanguages.silent = true;

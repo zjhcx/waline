@@ -51,7 +51,9 @@ const {
 let storage = null;
 let jwtKey = JWT_TOKEN;
 
-if (LEAN_KEY) {
+if (think.env === 'worker') {
+  storage = 'd1';
+} else if (LEAN_KEY) {
   storage = 'leancloud';
   jwtKey ||= LEAN_KEY;
 } else if (MONGO_DB) {

@@ -84,16 +84,19 @@ export default function Login() {
       return setError(t('please input 2fa code'));
     }
 
-    const token = await execute('login');
-
     try {
+      const token = await execute('login');
       await dispatch.user.login({
         email,
         password,
         code,
         remember,
-        recaptchaV3: window.recaptchaV3Key ? token : undefined,
-        turnstile: window.turnstileKey ? token : undefined,
+        cap: window.capApiEndpoint ? token : undefined,
+        recaptchaV3:
+          !window.capApiEndpoint && !window.turnstileKey && window.recaptchaV3Key
+            ? token
+            : undefined,
+        turnstile: !window.capApiEndpoint && window.turnstileKey ? token : undefined,
       });
     } catch {
       setError(t('email or password error'));
