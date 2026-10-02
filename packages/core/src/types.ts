@@ -145,6 +145,12 @@ export interface WalineServices {
   };
   captcha?: { verify(input: unknown, ctx: WalineContext): Promise<boolean> };
   spam?: { check(comment: Partial<WalineComment>, ctx: WalineContext): Promise<boolean> };
+  moderation?: {
+    check(
+      comment: Partial<WalineComment>,
+      ctx: WalineContext,
+    ): Promise<'approved' | 'waiting' | 'spam' | undefined>;
+  };
   markdown?: { render(value: string): Promise<string> | string };
   avatar?: { stringify(value: Partial<WalineComment> | WalineUser): Promise<string> | string };
   region?: { lookup(ip: string, depth: number): Promise<string> | string };

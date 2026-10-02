@@ -61,6 +61,10 @@ Vercel 需要在 <kbd>Settings</kbd> - <kbd>Environment Variables</kbd> 中进�
 | `IPQPS`               | `60`           | 基于 IP 的评论发布频率限制，单位为秒。设置为 0 不限制                                        |
 | `SECURE_DOMAINS`      |                | 安全域名配置，支持逗号分隔配置多个域名                                                       |
 | `AKISMET_KEY`         | `70542d86693e` | Akismet 反垃圾评论服务 Key (默认开启，不用请设置为 false)                                    |
+| `TENCENT_SECRET_ID`   | 无             | 腾讯云内容安全 API 密钥 ID，详见[配置说明](../../guide/features/tencent-content-security.md) |
+| `TENCENT_SECRET_KEY`  | 无             | 腾讯云内容安全 API 密钥 SecretKey，仅保存于服务端                                            |
+| `TENCENT_REGION`      | `ap-guangzhou` | 腾讯云内容安全地域                                                                           |
+| `TENCENT_BIZ_TYPE`    | 无             | 腾讯云内容安全业务策略 BizType                                                               |
 | `COMMENT_AUDIT`       | `false`        | 评论发布审核开关。开启后评论需要经过管理员审核后才能显示，所以建议在评论框默认文字上提供提示 |
 | `RECAPTCHA_V3_KEY`    |                | reCAPTCHA V3 key，须与客户端同时配置                                                         |
 | `RECAPTCHA_V3_SECRET` |                | reCAPTCHA V3 secret，服务端使用，不可泄漏                                                    |
