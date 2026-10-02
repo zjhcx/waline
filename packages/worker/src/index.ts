@@ -1,3 +1,11 @@
+import { moderateTencentText } from '../../core/src/tencent.js';
+import type { TencentModerationDiagnostic } from '../../core/src/tencent.js';
+
+const reportModeration = (event: TencentModerationDiagnostic): void => {
+  // Logs contain outcome metadata only, never credentials or comment content.
+  // oxlint-disable-next-line eslint/no-console
+  console.log('waline.tencent-moderation', event);
+};
 import {
   HttpError,
   checkPassword,
@@ -230,6 +238,7 @@ async function comments(request: Request, env: WorkerEnv, ctx: ExecutionContext,
       .bind(path, mail, nick, comment)
       .first();
     if (duplicate) throw new HttpError(400, 'Duplicate Content');
+    const moderation = await moderateTencentText(comment, env, globalThis.fetch, reportModeration);
     const row = await insert(env.DB, 'Comment', {
       comment,
       url: path,
@@ -242,7 +251,12 @@ async function comments(request: Request, env: WorkerEnv, ctx: ExecutionContext,
       rid: Number(data.rid) || null,
       user_id: user?.objectId ?? null,
       status:
-        env.COMMENT_AUDIT === 'true' && user?.type !== 'administrator' ? 'waiting' : 'approved',
+        moderation === 'spam'
+          ? 'spam'
+          : moderation === 'waiting' ||
+              (env.COMMENT_AUDIT === 'true' && user?.type !== 'administrator')
+            ? 'waiting'
+            : 'approved',
     });
     if (env.WEBHOOK && row) {
       ctx.waitUntil(
@@ -274,6 +288,18 @@ async function comments(request: Request, env: WorkerEnv, ctx: ExecutionContext,
         ['comment', 'nick', 'mail', 'link', 'url', 'status', 'sticky'].includes(key),
       ),
     );
+    if (data.comment !== undefined) {
+      const comment = text(data.comment);
+      if (!comment) throw new HttpError(400, 'comment is required');
+      allowed.comment = comment;
+      const moderation = await moderateTencentText(
+        comment,
+        env,
+        globalThis.fetch,
+        reportModeration,
+      );
+      if (moderation && moderation !== 'approved') allowed.status = moderation;
+    }
     const row = await update(env.DB, 'Comment', id, allowed);
     return success(row ? commentView(row as never, user) : null);
   }

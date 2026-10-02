@@ -10,6 +10,10 @@ export type WorkerEnv = Env & {
   SITE_URL: string;
   OAUTH_URL: string;
   COMMENT_AUDIT: string;
+  TENCENT_SECRET_ID?: string;
+  TENCENT_SECRET_KEY?: string;
+  TENCENT_REGION?: string;
+  TENCENT_BIZ_TYPE?: string;
 };
 
 export class HttpError extends Error {

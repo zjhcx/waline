@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const speakeasy = require('speakeasy');
 const parser = require('ua-parser-js');
 
-const { createWalineCore } = require('@waline/core');
+const { createWalineCore, moderateTencentText } = require('@waline/core');
 const { getMarkdownParser } = require('./markdown/index.js');
 
 module.exports = class extends think.Service {
@@ -133,6 +133,9 @@ module.exports = class extends think.Service {
                 think.logger.debug(err);
                 return false;
               }),
+        },
+        moderation: {
+          check: (value) => moderateTencentText(value.comment, process.env),
         },
         notification: {
           send: (value, parent, approved) =>

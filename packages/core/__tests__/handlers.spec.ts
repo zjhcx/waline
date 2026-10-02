@@ -614,6 +614,125 @@ describe('user handler', () => {
 });
 
 describe('comment handler', () => {
+  it.each(['waiting', 'spam'] as const)(
+    'applies moderation %s to submissions and edits',
+    async (status) => {
+      const env = setup();
+      const check = vi.fn(async () => status);
+      const core = createWalineCore({
+        ...env.options,
+        services: { ...env.options.services, moderation: { check } },
+      });
+      await core.comment.create({ comment: 'text', url: '/' }, context(guest));
+      expect(env.Comment.rows[0].status).toBe(status);
+      expect(check).toHaveBeenCalledTimes(1);
+      await core.comment.update(
+        { objectId: env.Comment.rows[0].objectId, data: { comment: 'edited' } },
+        context(guest),
+      );
+      expect(env.Comment.rows[0].status).toBe(status);
+      expect(check).toHaveBeenCalledTimes(2);
+      await core.comment.update(
+        { objectId: env.Comment.rows[0].objectId, data: { like: true } },
+        context(),
+      );
+      expect(check).toHaveBeenCalledTimes(2);
+      await core.comment.create({ comment: 'admin text', url: '/' }, context(administrator));
+      expect(check).toHaveBeenCalledTimes(3);
+      expect(env.Comment.rows[1].status).toBe(status);
+      await core.comment.update(
+        {
+          objectId: env.Comment.rows[1].objectId,
+          data: { comment: 'admin edit', status: 'approved' },
+        },
+        context(administrator),
+      );
+      expect(check).toHaveBeenCalledTimes(4);
+      expect(env.Comment.rows[1].status).toBe(status);
+      await core.comment.update(
+        { objectId: env.Comment.rows[1].objectId, data: { status: 'approved' } },
+        context(administrator),
+      );
+      expect(check).toHaveBeenCalledTimes(4);
+      expect(env.Comment.rows[1].status).toBe('approved');
+    },
+  );
+
+  it('preserves manual review when automatic moderation passes', async () => {
+    const env = setup({ config: { audit: true } });
+    const core = createWalineCore({
+      ...env.options,
+      services: { ...env.options.services, moderation: { check: async () => 'approved' } },
+    });
+    await core.comment.create({ comment: 'text', url: '/' }, context(guest));
+    expect(env.Comment.rows[0].status).toBe('waiting');
+  });
+
+  it('rechecks edited content and prevents users from setting like totals', async () => {
+    const env = setup({ config: { audit: true, forbiddenWords: ['bad'] } });
+    env.Comment.rows.push({
+      objectId: 'owned',
+      comment: 'safe',
+      url: '/',
+      status: 'approved',
+      user_id: guest.objectId,
+      insertedAt: new Date(),
+      like: 2,
+    });
+    await env.core.comment.update(
+      { objectId: 'owned', data: { comment: 'edited', status: 'approved' } },
+      context(guest),
+    );
+    expect(env.Comment.rows[0].status).toBe('waiting');
+    expect(env.services.spam.check).toHaveBeenCalledWith(
+      expect.objectContaining({ comment: 'edited' }),
+      expect.anything(),
+    );
+    await env.core.comment.update(
+      { objectId: 'owned', data: { comment: 'bad content' } },
+      context(guest),
+    );
+    expect(env.Comment.rows[0].status).toBe('spam');
+    await env.core.comment.update(
+      { objectId: 'owned', data: { comment: 'safe again' } },
+      context(guest),
+    );
+    expect(env.Comment.rows[0].status).toBe('spam');
+    await expect(
+      env.core.comment.update({ objectId: 'owned', data: { like: 1000 } }, context(guest)),
+    ).rejects.toMatchObject({ status: 400 });
+    await expect(
+      env.core.comment.update({ objectId: 'owned', data: { comment: '' } }, context(guest)),
+    ).rejects.toMatchObject({ status: 400 });
+    expect(env.Comment.rows[0].like).toBe(2);
+  });
+
+  it('rejects spam edits and leaves stored content intact when moderation fails', async () => {
+    const env = setup();
+    env.Comment.rows.push({
+      objectId: 'owned',
+      comment: 'safe',
+      url: '/',
+      status: 'approved',
+      user_id: guest.objectId,
+      insertedAt: new Date(),
+    });
+    env.services.spam.check.mockRejectedValueOnce(new Error('unavailable'));
+    await expect(
+      env.core.comment.update(
+        { objectId: 'owned', data: { comment: 'unchecked' } },
+        context(guest),
+      ),
+    ).rejects.toThrow('unavailable');
+    expect(env.Comment.rows[0].comment).toBe('safe');
+    env.services.spam.check.mockResolvedValueOnce(true);
+    await env.core.comment.update(
+      { objectId: 'owned', data: { comment: 'spam edit' } },
+      context(guest),
+    );
+    expect(env.Comment.rows[0].status).toBe('spam');
+  });
+
   const seed = (env: ReturnType<typeof setup>) => {
     env.Users.rows.push({ ...guest }, { ...administrator });
     env.Comment.rows.push(

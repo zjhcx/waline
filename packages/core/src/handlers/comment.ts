@@ -302,6 +302,11 @@ export const createCommentHandler = (runtime: CoreRuntime) => {
         }
       }
 
+      const moderation = await services.moderation?.check(data, ctx);
+      if (data.status !== 'spam' && moderation && moderation !== 'approved') {
+        data.status = moderation;
+      }
+
       const rejected = await hook('preSave', data, undefined, ctx);
       if (rejected) {
         throw new WalineError('HOOK_REJECTED', 400, undefined, rejected);
@@ -359,9 +364,33 @@ export const createCommentHandler = (runtime: CoreRuntime) => {
       }
 
       //@ts-expect-error: like type can be boolean or number
-      const data: Partial<WalineComment> = isAdmin(ctx)
-        ? { ...input.data }
-        : { comment: input.data.comment, like: input.data.like as number };
+      const data: Partial<WalineComment> = isAdmin(ctx) ? { ...input.data } : {};
+
+      if (!isAdmin(ctx) && input.data.comment !== undefined) {
+        data.comment = requiredString(input.data.comment, 'comment');
+        data.status = config.audit || old.status === 'waiting' ? 'waiting' : 'approved';
+        // Editing must not bypass the checks applied to newly submitted comments.
+        if (
+          old.status === 'spam' ||
+          (services.spam && (await services.spam.check({ ...old, ...data }, ctx))) ||
+          (config.forbiddenWords?.length &&
+            new RegExp(`(${config.forbiddenWords.join('|')})`, 'iu').test(data.comment))
+        ) {
+          data.status = 'spam';
+        }
+      }
+
+      if (input.data.comment !== undefined) {
+        data.comment = requiredString(input.data.comment, 'comment');
+        const moderation = await services.moderation?.check({ ...old, ...data }, ctx);
+        if (data.status !== 'spam' && moderation && moderation !== 'approved') {
+          data.status = moderation;
+        }
+      }
+
+      if (!isAdmin(ctx) && input.data.like !== undefined && !isLikeOnly) {
+        badRequest({ field: 'like' });
+      }
 
       if (typeof input.data.like === 'boolean') {
         data.like = Math.max(
